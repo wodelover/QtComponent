@@ -1,0 +1,12 @@
+#ifndef SPEAKERCOM_GLOBAL_H
+#define SPEAKERCOM_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(SPEAKERCOM_LIBRARY)
+#  define SPEAKERCOMSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define SPEAKERCOMSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // SPEAKERCOM_GLOBAL_H
