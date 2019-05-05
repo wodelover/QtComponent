@@ -17,7 +17,11 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QUrl>
-#include <QByteArray>
+#include <QVariant>
+
+#ifdef SET_SINGLE_MODE
+#include <QQmlEngine>
+#endif
 
 /**
  * @Title: HttpCom
@@ -33,8 +37,17 @@ class HTTPCOMSHARED_EXPORT HttpCom : public QObject
 {
     Q_OBJECT //需要引用的模块中添加network模块，否则编译找不到文件
 public:
+#ifndef SET_SINGLE_MODE
     HttpCom();
     ~HttpCom();
+#endif
+
+#ifdef SET_SINGLE_MODE
+    static HttpCom *getinstance();
+    static QObject *HttpCom_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+
+#endif
+
     /**
      * @MethodName: sendDataToServerByPost
      * @ClassName: HttpCom
@@ -48,7 +61,7 @@ public:
      * @Parma: [QByteArray] data 需要发送的数据
      * @Return: [void]
     **/
-    Q_INVOKABLE void sendDataToServerByPost(QUrl url,QByteArray data);
+    Q_INVOKABLE void sendDataToServerByPost(QUrl url,QVariant data);
 
     /**
      * @MethodName: sendDataToServerByPost
@@ -63,7 +76,7 @@ public:
      * @Parma: [QByteArray] data 需要发送的数据
      * @Return: [void]
     **/
-    Q_INVOKABLE void sendDataToServerByPost(QString url,QByteArray data);
+    Q_INVOKABLE void sendDataToServerByPost(QString url, QVariant data);
 
     /**
      * @MethodName: getDataFromServerByGet
@@ -96,7 +109,8 @@ public:
     /**
      * @MethodName: setrequestRawHeader
      * @ClassName: HttpCom
-     * @Description: 设置访问信息的头部信息
+     * @Description: 设置访问信息的头部信息,如指定http数据包接收类型为json
+     * HttpCom::setRequestRawHeader("Content-Type","application/json");
      * @Autor: ZhangHao kinderzhang@foxmail.com
      * @date: 2018-10-23 13:16:56
      * @Version: 1.0.0
@@ -119,9 +133,19 @@ signals:
     void requestError(int errorCode);
 
 private:
+#ifdef SET_SINGLE_MODE
+    HttpCom();
+    ~HttpCom();
+    static HttpCom *instance;
+    static QNetworkAccessManager *m_manager;
+    static QNetworkRequest *m_request;
+    static QNetworkReply *m_reply;
+#endif
+#ifndef SET_SINGLE_MODE
     QNetworkAccessManager *m_manager;
     QNetworkRequest *m_request;
     QNetworkReply *m_reply;
+#endif
 };
 
 #endif // HTTPCOM_H
