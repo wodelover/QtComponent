@@ -34,3 +34,8 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+# config this var to control single mode
+DEFINES += SET_SINGLE_MODE
+QT            += qml
+# end
