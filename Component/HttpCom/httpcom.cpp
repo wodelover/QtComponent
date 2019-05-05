@@ -8,6 +8,14 @@
 /*                  Copyright (C) ZhangHao All rights reserved           */
 /*************************************************************************/
 #include "httpcom.h"
+#include <QDebug>
+
+#ifdef SET_SINGLE_MODE
+HttpCom *HttpCom::instance=nullptr;
+QNetworkAccessManager *HttpCom::m_manager=nullptr;
+QNetworkRequest *HttpCom::m_request=nullptr;
+QNetworkReply *HttpCom::m_reply=nullptr;
+#endif
 
 void HttpCom::requestFinished()
 {
@@ -19,16 +27,41 @@ void HttpCom::slotError(QNetworkReply::NetworkError errCode)
     emit requestError(static_cast<int>(errCode));
 }
 
-void HttpCom::sendDataToServerByPost(QUrl url, QByteArray data)
+#ifdef SET_SINGLE_MODE
+HttpCom *HttpCom::getinstance()
 {
-    m_request->setUrl(url);
-    m_reply = m_manager->post(*m_request,data);
-    connect(m_reply, SIGNAL(readyRead()), this, SLOT(requestFinished()));
-    connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
-            this, SLOT(slotError(QNetworkReply::NetworkError)));
+#ifdef SET_SINGLE_MODE
+    if(nullptr==instance){
+        instance = new HttpCom();
+        m_manager = new QNetworkAccessManager ;
+        m_request = new QNetworkRequest;
+    }
+    return instance;
+#endif
 }
 
-void HttpCom::sendDataToServerByPost(QString url, QByteArray data)
+QObject *HttpCom::HttpCom_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine);
+    Q_UNUSED(scriptEngine);
+    return getinstance();
+}
+#endif
+
+void HttpCom::sendDataToServerByPost(QUrl url, QVariant data)
+{
+    m_request->setUrl(url);
+    try {
+        m_reply = m_manager->post(*m_request,data.toByteArray());
+        throw 0;
+    } catch (int) {
+        connect(m_reply, SIGNAL(readyRead()), this, SLOT(requestFinished()));
+        connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
+                this, SLOT(slotError(QNetworkReply::NetworkError)));
+    }
+}
+
+void HttpCom::sendDataToServerByPost(QString url, QVariant data)
 {
     QUrl address(url);
     sendDataToServerByPost(address,data);
@@ -37,10 +70,14 @@ void HttpCom::sendDataToServerByPost(QString url, QByteArray data)
 void HttpCom::getDataFromServerByGet(QUrl url)
 {
     m_request->setUrl(url);
-    m_reply = m_manager->get(*m_request);
-    connect(m_reply, SIGNAL(readyRead()), this, SLOT(requestFinished()));
-    connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
-            this, SLOT(slotError(QNetworkReply::NetworkError)));
+    try {
+        m_reply = m_manager->get(*m_request);
+        throw 0;
+    } catch (int) {
+        connect(m_reply, SIGNAL(readyRead()), this, SLOT(requestFinished()));
+        connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
+                this, SLOT(slotError(QNetworkReply::NetworkError)));
+    }
 }
 
 void HttpCom::getDataFromServerByGet(QString url)
@@ -61,8 +98,10 @@ void HttpCom::setRequestHeader(QNetworkRequest::KnownHeaders header, QVariant va
 
 HttpCom::HttpCom()
 {
+#ifndef SET_SINGLE_MODE
     m_manager = new QNetworkAccessManager ;
     m_request = new QNetworkRequest;
+#endif
 }
 
 HttpCom::~HttpCom()
@@ -76,6 +115,4 @@ HttpCom::~HttpCom()
         delete m_request;
         m_request = nullptr;
     }
-
-    m_reply = nullptr;
 }
