@@ -198,7 +198,7 @@ void TcpServerCom::hasNewData()
     //handle client data
     for(int i=0;i<m_clients.size();i++){
         QTcpSocket *socket = m_clients[i];
-        if(socket->bytesAvailable()){
+        while(socket->bytesAvailable()){
             QDataStream in(socket);
             in.setVersion(QDataStream::Qt_5_7);
             if(m_sizes[i]==-1){
