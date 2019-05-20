@@ -113,12 +113,17 @@ public:
      * @Version: 1.0.0
     **/
     Q_INVOKABLE long long getDataBufferSize();
+
 signals:
     void serverIPChanged(QString ip);//IP地址改变
     void serverPortChanged(int port);//端口号改变
     void hasNewDataFromServer(QByteArray data);//新数据到来
     void sofChanged(QString sof);
     void eofChanged(QString eof);
+    void connected();
+    void disconnected();
+    void error(QAbstractSocket::SocketError socketError);
+
 protected slots:
     void readyread();
 
