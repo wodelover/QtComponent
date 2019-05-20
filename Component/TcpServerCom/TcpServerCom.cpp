@@ -288,4 +288,3 @@ QByteArray TcpServerCom::compressDataFrame(QByteArray cdata)
     out << m_eof;
     return ba;
 }
-
