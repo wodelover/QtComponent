@@ -152,6 +152,9 @@ void TcpClientCom::readyread()
 void TcpClientCom::initSignal()
 {
     connect(&m_socket,SIGNAL(readyRead()),this,SLOT(readyread()));
+    connect(&m_socket,SIGNAL(connected()),this,SIGNAL(connected()));
+    connect(&m_socket,SIGNAL(disconnected()),this,SIGNAL(disconnected()));
+    connect(&m_socket, SIGNAL(error(QAbstractSocket::SocketError)),this,SIGNAL(error(QAbstractSocket::SocketError)));
 }
 
 QByteArray TcpClientCom::compressDataFrame(QByteArray cdata)
